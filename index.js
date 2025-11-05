@@ -36,11 +36,6 @@ for (const file of commandFiles) {
 client.once("clientReady", async () => {
   console.log("Ready!");
   await client.application.commands.set(client.commands.map((cmd) => cmd.data));
-  const immediateAccess = client.guilds.cache.get(MY_GUILD);
-  if (immediateAccess) {
-    await immediateAccess.commands.set(client.commands.map((cmd) => cmd.data));
-    console.log(`Commands also registered instantly for guild: ${guild.name}`);
-  }
   startCronJob(client);
 });
 
