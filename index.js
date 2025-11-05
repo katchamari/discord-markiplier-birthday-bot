@@ -35,8 +35,19 @@ for (const file of commandFiles) {
 
 client.once("clientReady", async () => {
   console.log("Ready!");
-  await client.application.commands.set(client.commands.map((cmd) => cmd.data));
-  startCronJob(client);
+  const guild = client.guilds.cache.get(MY_GUILD);
+
+  if (guild) {
+    console.log("Registering commands for guild...");
+    await guild.commands.set(client.commands.map((cmd) => cmd.data));
+    console.log("Guild commands registered");
+  } else {
+    console.log("Registering global commands...");
+    await client.application.commands.set(
+      client.commands.map((cmd) => cmd.data)
+    );
+    console.log("Global commands registered");
+  }
 });
 
 client.on("interactionCreate", async (interaction) => {

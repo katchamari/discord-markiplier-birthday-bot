@@ -24,8 +24,9 @@ module.exports = {
       );
     const birthdayList = await Promise.all(
       birthdays.map(async (birthday) => {
+        const user = await client.users.fetch(birthday.userId);
         return `
-${bold("User:")} ${userMention(birthday.userId)} 
+${bold("User:")} ${user.username} 
 ${bold("Birthday:")} ${birthday.date.month}/${birthday.date.day}/${
           birthday.date.year
         }
