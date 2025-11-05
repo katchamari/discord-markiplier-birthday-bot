@@ -1,5 +1,6 @@
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
-const { token, mongo_uri, my_guild } = require("./config.json");
+require("dotenv").config();
+const { token, mongo_uri, my_guild } = process.env;
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
