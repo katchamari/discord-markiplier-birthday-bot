@@ -1,6 +1,6 @@
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
 require("dotenv").config();
-const { token, mongo_uri, my_guild } = process.env;
+const { TOKEN, MONGO_URI, MY_GUILD } = process.env;
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
@@ -9,7 +9,7 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 mongoose.set("strictQuery", true);
-const mongoDB = mongo_uri;
+const mongoDB = MONGO_URI;
 async function connectToDatabase() {
   await mongoose.connect(mongoDB);
 }
@@ -36,7 +36,7 @@ for (const file of commandFiles) {
 client.once("clientReady", async () => {
   console.log("Ready!");
   await client.application.commands.set(client.commands.map((cmd) => cmd.data));
-  const immediateAccess = client.guilds.cache.get(my_guild);
+  const immediateAccess = client.guilds.cache.get(MY_GUILD);
   if (immediateAccess) {
     await immediateAccess.commands.set(client.commands.map((cmd) => cmd.data));
     console.log(`Commands also registered instantly for guild: ${guild.name}`);
@@ -87,4 +87,4 @@ ${error.customMessage || error.message}
     }
   }
 });
-client.login(token);
+client.login(TOKEN);
