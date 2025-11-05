@@ -97,7 +97,7 @@ const checkForBirthdays = async (client) => {
 };
 
 const startCronJob = (client) => {
-  cron.schedule("* * * * *", () => {
+  cron.schedule("*/10 * * * *", () => {
     checkForBirthdays(client);
   });
 };
