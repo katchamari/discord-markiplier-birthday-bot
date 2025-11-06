@@ -7,6 +7,7 @@ const BirthdayService = require("./services/BirthdayService");
 const { userMention } = require("@discordjs/formatters");
 const Birthday = require("./models/Birthday");
 const { blockQuote } = require("@discordjs/formatters");
+const { activities, Activity } = require("./Activities");
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -96,9 +97,23 @@ const checkForBirthdays = async (client) => {
   }
 };
 
+const setActivity = (client) => {
+  try {
+    const numberOfActivities = activities.length;
+    const randomActivity =
+      activities[Math.floor(Math.random() * numberOfActivities)];
+    client.user.setPresence(new Activity(randomActivity));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 const startCronJob = (client) => {
   cron.schedule("*/10 * * * *", () => {
     checkForBirthdays(client);
+  });
+  cron.schedule("*/25 * * * *", () => {
+    setActivity(client);
   });
 };
 
