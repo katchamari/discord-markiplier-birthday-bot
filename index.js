@@ -4,6 +4,15 @@ const { TOKEN, MONGO_URI, MY_GUILD } = process.env;
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
+const { SocksProxyAgent } = require("socks-proxy-agent");
+
+const fixieUrl = process.env.FIXIE_SOCKS_HOST;
+const mongoOptions = {};
+if (fixieUrl) {
+  const agent = new SocksProxyAgent(fixieUrl);
+  mongoOptions.socketFactory = () => agent;
+}
+
 const { startCronJob } = require("./cron");
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
@@ -11,7 +20,7 @@ const client = new Client({
 mongoose.set("strictQuery", true);
 const mongoDB = MONGO_URI;
 async function connectToDatabase() {
-  await mongoose.connect(mongoDB);
+  await mongoose.connect(mongoDB, mongoOptions);
 }
 connectToDatabase().catch((err) => console.log(err));
 
@@ -48,6 +57,7 @@ client.once("clientReady", async () => {
     );
     console.log("Global commands registered");
   }
+  startCronJob(client);
 });
 
 client.on("interactionCreate", async (interaction) => {
