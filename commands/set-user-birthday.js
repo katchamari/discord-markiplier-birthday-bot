@@ -50,6 +50,7 @@ module.exports = {
     const botSettingsService = new BotSettingsService({
       queryObj: { guildId: interaction.guildId },
       useLean: true,
+      select: "timezone",
     });
     const config = await botSettingsService.getResource();
     const now = dayjs().tz(config.timezone);
@@ -71,9 +72,11 @@ module.exports = {
           year,
         },
       },
+      select: "_id guildId",
     });
-    const existingBirthday = await birthdayService.getResource();
-    if (!existingBirthday) await birthdayService.createResource();
+    birthdayService.fetchedResource = await birthdayService.getResource();
+    if (!birthdayService.fetchedResource)
+      await birthdayService.createResource();
     else await birthdayService.updateResource();
     interaction.reply(
       blockQuote(

@@ -13,6 +13,8 @@ module.exports = {
   async execute(interaction) {
     const birthdayService = new BirthdayService({
       queryObj: { guildId: interaction.guildId },
+      useLean: true,
+      select: "userId date guildId",
     });
     const birthdays = await birthdayService.getResources();
     if (!birthdays.length)

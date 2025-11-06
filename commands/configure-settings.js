@@ -53,16 +53,18 @@ module.exports = {
         timezone,
         roleId,
       },
+      select: "_id",
     });
 
-    const existingSettings = await botSettingsService.getResource();
-    if (!existingSettings) await botSettingsService.createResource();
+    botSettingsService.fetchedResource = await botSettingsService.getResource();
+    if (!botSettingsService.fetchedResource)
+      await botSettingsService.createResource();
     else botSettingsService.updateResource();
     interaction.reply(
       blockQuote(
         `Hello everybody my name is Markiplier! I'll send automatic birthday messages to ${channelMention(
           channelId
-        )} at around midnight ${timezone} time.`
+        )} at around midnight ${timezone} time. Make sure my role is higher than the set birthday role, and make sure that I have the correct permissions to send messages to the set channel.`
       )
     );
   },
