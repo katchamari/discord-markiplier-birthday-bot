@@ -4,23 +4,23 @@ const { TOKEN, MONGO_URI, MY_GUILD } = process.env;
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
-const { SocksProxyAgent } = require("socks-proxy-agent");
-
-const fixieUrl = process.env.FIXIE_SOCKS_HOST;
-const mongoOptions = {};
-if (fixieUrl) {
-  const agent = new SocksProxyAgent(fixieUrl);
-  mongoOptions.socketFactory = () => agent;
-}
-
 const { startCronJob } = require("./cron");
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 mongoose.set("strictQuery", true);
-const mongoDB = MONGO_URI;
 async function connectToDatabase() {
-  await mongoose.connect(mongoDB, mongoOptions);
+  const mongoConfig = {};
+  if (process.env.FIXIE_SOCKS_HOST) {
+    const fixieData = process.env.FIXIE_SOCKS_HOST.split(
+      new RegExp("[/(:\\/@/]+")
+    );
+    mongoConfig.proxyUsername = fixieData[0];
+    mongoConfig.proxyPassword = fixieData[1];
+    mongoConfig.proxyHost = fixieData[2];
+    mongoConfig.proxyPort = fixieData[3];
+  }
+  mongoose.connect(MONGO_URI, mongoConfig);
 }
 connectToDatabase().catch((err) => console.log(err));
 
