@@ -32,13 +32,13 @@ BirthdaySchema.post(
       body: {
         $pull: { birthdays: doc._id },
       },
+      select: "_id",
     });
     await botSettingsService.updateResource();
     return next();
   }
 );
 BirthdaySchema.post("save", async function (doc, next) {
-  console.log(doc.guildId, doc._id);
   const botSettingsService = new BotSettingsService({
     queryObj: {
       guildId: doc.guildId,
@@ -48,10 +48,10 @@ BirthdaySchema.post("save", async function (doc, next) {
         birthdays: doc._id,
       },
     },
+    select: "_id",
   });
-  const guildSettings = await botSettingsService.getResource();
-  console.log(guildSettings);
-  if (!guildSettings) {
+  botSettingsService.fetchedResource = await botSettingsService.getResource();
+  if (!botSettingsService.fetchedResource) {
     return next(
       new ErrorClass(
         "Guild settings not found",
@@ -60,7 +60,6 @@ BirthdaySchema.post("save", async function (doc, next) {
     );
   }
   if (this.wasNew) {
-    console.log(botSettingsService.fetchedResource, "sdfsdfds");
     await botSettingsService.updateResource();
   }
   return next();

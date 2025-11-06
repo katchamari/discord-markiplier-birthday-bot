@@ -27,30 +27,34 @@ const calculateAge = (birthYear, currentYear) => {
 };
 const checkForBirthdays = async (client) => {
   try {
-    const botSettingsService = new BotSettingsService({ queryObj: {} });
+    const botSettingsService = new BotSettingsService({
+      queryObj: {},
+      useLean: true,
+      select: "timezone roleId guildId channelId",
+    });
     const configs = await botSettingsService.getResources();
     for (let config of configs) {
       const { month, day, year, startOfYear } = getCurrentDate(config.timezone);
 
-      const birthdayService2 = new BirthdayService({
+      const expiredBirthdayService = new BirthdayService({
         queryObj: {
-          lastNotified: { $gte: startOfYear.toDate() },
-          $or: [{ "date.month": { $ne: month } }, { "date.day": { $ne: day } }],
           markedBday: true,
+          $or: [{ "date.month": { $ne: month } }, { "date.day": { $ne: day } }],
         },
         body: {
           markedBday: false,
         },
+        select: "userId guildId",
       });
-      const expiredBirthdays = await birthdayService2.getResources();
+      const expiredBirthdays = await expiredBirthdayService.getResources();
       for (let birthday of expiredBirthdays) {
         if (config.roleId) {
           const guild = await client.guilds.fetch(config.guildId);
           const member = await guild.members.fetch(birthday.userId);
           if (guild && member) await member.roles.remove(config.roleId);
         }
-        birthdayService2.fetchedResource = birthday;
-        birthdayService2.updateResource();
+        expiredBirthdayService.fetchedResource = birthday;
+        expiredBirthdayService.updateResource();
       }
 
       const birthdayService = new BirthdayService({
@@ -67,10 +71,15 @@ const checkForBirthdays = async (client) => {
           lastNotified: new Date(),
           markedBday: true,
         },
+        select: "userId date.year guildId",
       });
       const foundBirthdays = await birthdayService.getResources();
       if (foundBirthdays && foundBirthdays.length) {
         const channel = await client.channels.fetch(config.channelId);
+        if (!channel.permissionsFor(client.user).has("SendMessages")) {
+          console.error("Bot cannot send messages in this channel!");
+        }
+
         for (let birthday of foundBirthdays) {
           if (config.roleId) {
             const guild = await client.guilds.fetch(config.guildId);
@@ -109,7 +118,8 @@ const setActivity = (client) => {
 };
 
 const startCronJob = (client) => {
-  cron.schedule("*/10 * * * *", () => {
+  cron.schedule("* * * * *", () => {
+    console.log("sdfdsfsdf");
     checkForBirthdays(client);
   });
   cron.schedule("*/25 * * * *", () => {

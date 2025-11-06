@@ -1,4 +1,5 @@
 const ErrorClass = require("../ErrorClass");
+const applyMongoOperators = require("../helpers/applyMongoOperators");
 
 class BaseService {
   constructor(config, Model) {
@@ -8,6 +9,8 @@ class BaseService {
     this.populateFields = config.populateFields || [];
     this.fetchedResource = config.fetchedResource;
     this.guildId = config.guildId;
+    this.select = config.select;
+    this.useLean = config.useLean;
   }
 
   async getResources() {
@@ -49,7 +52,6 @@ class BaseService {
     if (!resource) {
       return;
     }
-    this.fetchedResource = resource;
     return resource;
   }
 
@@ -59,13 +61,12 @@ class BaseService {
   }
 
   async updateResource() {
-    const resource = await this.Model.findOneAndUpdate(
-      this.queryObj,
-      this.body,
-      { new: true }
-    );
+    const resource =
+      this.fetchedResource || (await this.Model.findOne(this.queryObj));
     if (!resource)
       throw new ErrorClass("Resource not found", "This item doesn't exist!");
+    applyMongoOperators(resource, this.body);
+    await resource.save();
     return resource;
   }
 
