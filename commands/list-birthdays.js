@@ -11,7 +11,6 @@ module.exports = {
     .setName("list-birthdays")
     .setDescription("List all user birthdays"),
   async execute(interaction) {
-    console.log("sdfdsf");
     const birthdayService = new BirthdayService({
       queryObj: { guildId: interaction.guildId },
     });
