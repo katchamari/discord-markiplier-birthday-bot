@@ -4,6 +4,7 @@ const dayjs = require("dayjs");
 const customParseFormat = require("dayjs/plugin/customParseFormat");
 const ErrorClass = require("../ErrorClass");
 const BotSettingsService = require("../services/BotSettingsService");
+const formatBirthday = require("../helpers/formatBirthday");
 dayjs.extend(customParseFormat);
 
 module.exports = {
@@ -82,7 +83,7 @@ module.exports = {
       blockQuote(
         `My name is Markiplier and I successfully set ${userMention(
           userId
-        )}'s birthday to ${month}/${day}/${year}`
+        )}'s birthday to ${formatBirthday({ month, day, year })}`
       )
     );
   },

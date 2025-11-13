@@ -11,6 +11,7 @@ class BaseService {
     this.guildId = config.guildId;
     this.select = config.select;
     this.useLean = config.useLean;
+    this.sort = config.sort;
   }
 
   async getResources() {

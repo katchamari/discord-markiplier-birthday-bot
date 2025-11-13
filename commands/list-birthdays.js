@@ -5,6 +5,7 @@ const {
   bold,
 } = require("discord.js");
 const BirthdayService = require("../services/BirthdayService");
+const formatBirthday = require("../helpers/formatBirthday");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,6 +14,12 @@ module.exports = {
   async execute(interaction) {
     const birthdayService = new BirthdayService({
       queryObj: { guildId: interaction.guildId },
+      sort: {
+        "date.month": 1,
+        "date.day": 1,
+        "date.year": 1,
+        _id: 1,
+      },
       useLean: true,
       select: "userId date guildId",
     });
@@ -28,9 +35,7 @@ module.exports = {
         const user = await interaction.client.users.fetch(birthday.userId);
         return `
 ${bold("User:")} ${user.username} 
-${bold("Birthday:")} ${birthday.date.month}/${birthday.date.day}/${
-          birthday.date.year
-        }
+${bold("Birthday:")} ${formatBirthday(birthday.date)}
 `;
       })
     );

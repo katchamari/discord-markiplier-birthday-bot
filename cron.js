@@ -119,7 +119,6 @@ const setActivity = (client) => {
 
 const startCronJob = (client) => {
   cron.schedule("*/10 * * * *", () => {
-    console.log("sdfdsfsdf");
     checkForBirthdays(client);
   });
   cron.schedule("*/25 * * * *", () => {
