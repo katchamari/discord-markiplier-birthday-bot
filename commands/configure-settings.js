@@ -23,7 +23,7 @@ module.exports = {
       option
         .setName("timezone")
         .setDescription("Select your time zone (e.g., America/New_York)")
-        .setAutocomplete(true) // Enable autocomplete
+        .setAutocomplete(true)
         .setRequired(true)
     )
     .addRoleOption((option) =>
