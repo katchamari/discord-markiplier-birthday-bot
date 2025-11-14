@@ -6,7 +6,11 @@ const path = require("node:path");
 const mongoose = require("mongoose");
 const { startCronJob } = require("./cron");
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessagePolls,
+  ],
 });
 mongoose.set("strictQuery", true);
 async function connectToDatabase() {
