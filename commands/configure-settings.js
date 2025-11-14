@@ -5,6 +5,7 @@ const {
   channelMention,
 } = require("discord.js");
 const BotSettingsService = require("../services/BotSettingsService");
+const timezones = require("../helpers/timezones");
 const timeZones = Intl.supportedValuesOf("timeZone");
 
 module.exports = {
@@ -32,11 +33,18 @@ module.exports = {
         .setRequired(true)
     ),
   async autocomplete(interaction) {
-    const focusedValue = interaction.options.getFocused();
-    const filtered = timeZones
-      .filter((tz) => tz.toLowerCase().includes(focusedValue.toLowerCase()))
+    const focused = interaction.options.getFocused().toLowerCase();
+    const results = timezones
+      .filter(
+        (tz) =>
+          tz.label.toLowerCase().includes(focused) ||
+          tz.value.toLowerCase().includes(focused) ||
+          tz.aliases.some((a) => a.includes(focused))
+      )
       .slice(0, 25);
-    await interaction.respond(filtered.map((tz) => ({ name: tz, value: tz })));
+    return interaction.respond(
+      results.map((tz) => ({ name: tz.label, value: tz.value }))
+    );
   },
   async execute(interaction) {
     const channelId = interaction.options.getChannel("channel").id;
