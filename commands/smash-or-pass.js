@@ -5,23 +5,20 @@ const fetchData = require("../helpers/fetchData");
 const markSmashes = require("../helpers/markSmashes");
 dayjs.extend(customParseFormat);
 
+const pokeApiUrl = "https://pokeapi.co/api/v2";
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("smash-or-pass")
     .setDescription("Smash or pass pokemon"),
   async execute(interaction) {
-    const { count } = await fetchData(
-      "https://pokeapi.co/api/v2/pokemon-species/?limit=0"
-    );
+    const { count } = await fetchData(`${pokeApiUrl}/pokemon-species/?limit=0`);
     const randomNumber = Math.floor(Math.random() * count);
 
     const {
       varieties = [],
       name,
       flavor_text_entries = [],
-    } = await fetchData(
-      `https://pokeapi.co/api/v2/pokemon-species/${randomNumber}`
-    );
+    } = await fetchData(`${pokeApiUrl}/pokemon-species/${randomNumber}`);
 
     const { sprites } = await fetchData(
       varieties.find(({ is_default }) => is_default).pokemon.url
