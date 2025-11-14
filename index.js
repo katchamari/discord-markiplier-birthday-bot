@@ -69,13 +69,19 @@ client.once("clientReady", async () => {
 
 if (BOX_JOKE_GUILDS) {
   client.on("messageCreate", async (message) => {
-    if (message.author.bot || !BOX_JOKE_GUILDS.includes(message.guildId))
-      return;
-    const { content = "" } = message;
-    const allWords = content.split(" ");
-    const boxMentioned = allWords.find((word) => word.toLowerCase() === "box");
-    if (boxMentioned) {
-      await message.reply("Stephen?");
+    try {
+      if (message.author.bot || !BOX_JOKE_GUILDS.includes(message.guildId))
+        return;
+      const { content = "" } = message;
+      const allWords = content.split(" ");
+      const boxMentioned = allWords.find(
+        (word) => word.toLowerCase() === "box"
+      );
+      if (boxMentioned) {
+        await message.reply("Stephen?");
+      }
+    } catch (err) {
+      console.error(err);
     }
   });
 }
