@@ -1,6 +1,6 @@
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
 require("dotenv").config();
-const { TOKEN, MONGO_URI, MY_GUILD } = process.env;
+const { TOKEN, MONGO_URI, MY_GUILD, BOX_JOKE_GUILDS } = process.env;
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
@@ -10,6 +10,9 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessagePolls,
+    ...(BOX_JOKE_GUILDS
+      ? [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+      : []),
   ],
 });
 mongoose.set("strictQuery", true);
@@ -63,6 +66,19 @@ client.once("clientReady", async () => {
   }
   startCronJob(client);
 });
+
+if (BOX_JOKE_GUILDS) {
+  client.on("messageCreate", async (message) => {
+    if (message.author.bot || !BOX_JOKE_GUILDS.includes(message.guildId))
+      return;
+    const { content = "" } = message;
+    const allWords = content.split(" ");
+    const boxMentioned = allWords.find((word) => word.toLowerCase() === "box");
+    if (boxMentioned) {
+      await message.reply("Stephen?");
+    }
+  });
+}
 
 client.on("interactionCreate", async (interaction) => {
   if (interaction.isAutocomplete()) {
