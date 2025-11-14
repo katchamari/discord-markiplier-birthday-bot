@@ -74,8 +74,8 @@ if (BOX_JOKE_GUILDS) {
         return;
       const { content = "" } = message;
       const allWords = content.split(" ");
-      const boxMentioned = allWords.find(
-        (word) => word.toLowerCase() === "box"
+      const boxMentioned = allWords.find((word) =>
+        ["box", "boxes"].includes(word.toLowerCase())
       );
       if (boxMentioned) {
         await message.reply("Stephen?");
