@@ -5,14 +5,14 @@ const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
 const { startCronJob } = require("./cron");
+const markSmashes = require("./helpers/markSmashes");
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessagePolls,
-    ...(BOX_JOKE_GUILDS
-      ? [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
-      : []),
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
   ],
 });
 mongoose.set("strictQuery", true);
@@ -67,24 +67,34 @@ client.once("clientReady", async () => {
   startCronJob(client);
 });
 
-if (BOX_JOKE_GUILDS) {
-  client.on("messageCreate", async (message) => {
-    try {
-      if (message.author.bot || !BOX_JOKE_GUILDS.includes(message.guildId))
-        return;
-      const { content = "" } = message;
-      const allWords = content.split(" ");
+client.on("messageCreate", async (message) => {
+  try {
+    if (message.author.bot) return;
+    const { content = "" } = message;
+    const allWords = content.split(" ");
+    if (BOX_JOKE_GUILDS.includes(message.guildId)) {
       const boxMentioned = allWords.find((word) =>
         ["box", "boxes"].includes(word.toLowerCase())
       );
       if (boxMentioned) {
         await message.reply("Stephen?");
       }
-    } catch (err) {
-      console.error(err);
     }
-  });
-}
+    if (
+      allWords.find((word) => {
+        const wordMatchCase =
+          word.slice(0, 1).toUpperCase() + word.slice(1).toLowerCase();
+
+        console.log(wordMatchCase);
+        return markSmashes.includes(wordMatchCase);
+      })
+    ) {
+      await message.reply("Smash");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});
 
 client.on("interactionCreate", async (interaction) => {
   if (interaction.isAutocomplete()) {
