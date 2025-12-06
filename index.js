@@ -1,11 +1,11 @@
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
 require("dotenv").config();
-const { TOKEN, MONGO_URI, MY_GUILD, BOX_JOKE_GUILDS } = process.env;
+const { TOKEN, MONGO_URI, MY_GUILD } = process.env;
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");
 const { startCronJob } = require("./cron");
-const markSmashes = require("./helpers/markSmashes");
+const wordDetections = require("./helpers/wordDetections");
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -71,24 +71,18 @@ client.on("messageCreate", async (message) => {
   try {
     if (message.author.bot) return;
     const { content = "" } = message;
-    const allWords = content.split(" ");
-    if (BOX_JOKE_GUILDS.includes(message.guildId)) {
-      const boxMentioned = allWords.find((word) =>
-        ["box", "boxes"].includes(word.toLowerCase().replace(/[^a-zA-Z]/g, ""))
-      );
-      if (boxMentioned) {
-        await message.reply("Stephen?");
+    wordDetections({ message }).forEach(
+      ({ detect = [], react = () => {}, guildIds }) => {
+        if (guildIds && !guildIds.includes(message.guildId)) return;
+        if (
+          detect.some((word) =>
+            content.toLowerCase().includes(word.toLowerCase())
+          )
+        ) {
+          react();
+        }
       }
-    }
-    if (
-      allWords.find((word) => {
-        return !!markSmashes.find((smash) => {
-          return word.toLowerCase().includes(smash.toLowerCase());
-        });
-      })
-    ) {
-      await message.reply("Smash");
-    }
+    );
   } catch (err) {
     console.error(err);
   }
