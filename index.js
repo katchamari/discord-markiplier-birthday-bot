@@ -82,10 +82,9 @@ client.on("messageCreate", async (message) => {
     }
     if (
       allWords.find((word) => {
-        const wordMatchCase =
-          word.slice(0, 1).toUpperCase() + word.slice(1).toLowerCase();
-
-        return !!markSmashes.find((smash) => wordMatchCase.includes(smash));
+        return !!markSmashes.find((smash) => {
+          return word.toLowerCase().includes(smash.toLowerCase());
+        });
       })
     ) {
       await message.reply("Smash");
