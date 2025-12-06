@@ -15,5 +15,9 @@ module.exports = ({ message }) => {
       detect: ["kitty"],
       react: () => message.reply("You're so Portuguese!"),
     },
+    {
+      detect: ["87"],
+      react: () => message.reply("...Was that the bite of '87?"),
+    },
   ];
 };
