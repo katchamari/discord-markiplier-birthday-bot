@@ -74,7 +74,7 @@ client.on("messageCreate", async (message) => {
     const allWords = content.split(" ");
     if (BOX_JOKE_GUILDS.includes(message.guildId)) {
       const boxMentioned = allWords.find((word) =>
-        ["box", "boxes"].includes(word.toLowerCase())
+        ["box", "boxes"].includes(word.toLowerCase().replace(/[^a-zA-Z]/g, ""))
       );
       if (boxMentioned) {
         await message.reply("Stephen?");
@@ -85,8 +85,7 @@ client.on("messageCreate", async (message) => {
         const wordMatchCase =
           word.slice(0, 1).toUpperCase() + word.slice(1).toLowerCase();
 
-        console.log(wordMatchCase);
-        return markSmashes.includes(wordMatchCase);
+        return !!markSmashes.find((smash) => wordMatchCase.includes(smash));
       })
     ) {
       await message.reply("Smash");
