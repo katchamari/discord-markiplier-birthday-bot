@@ -15,25 +15,25 @@ module.exports = {
       option
         .setName("targetuser")
         .setDescription("Select a user to set birthday for.")
-        .setRequired(true)
+        .setRequired(true),
     )
     .addIntegerOption((option) =>
       option
         .setName("month")
         .setDescription("Enter month of birth")
-        .setRequired(true)
+        .setRequired(true),
     )
     .addIntegerOption((option) =>
       option
         .setName("day")
         .setDescription("Enter day of birth")
-        .setRequired(true)
+        .setRequired(true),
     )
     .addIntegerOption((option) =>
       option
         .setName("year")
         .setDescription("Enter year of birth")
-        .setRequired(true)
+        .setRequired(true),
     ),
   async execute(interaction) {
     const month = interaction.options.getInteger("month");
@@ -54,6 +54,10 @@ module.exports = {
       select: "timezone",
     });
     const config = await botSettingsService.getResource();
+    if (!config)
+      throw new ErrorClass(
+        "Please configure settings with /configure-settings first",
+      );
     const now = dayjs().tz(config.timezone);
     if (parsedDate.isAfter(now, "day")) {
       throw new ErrorClass("Date cannot be in the future");
@@ -82,9 +86,9 @@ module.exports = {
     interaction.reply(
       blockQuote(
         `My name is Markiplier and I successfully set ${userMention(
-          userId
-        )}'s birthday to ${formatBirthday({ month, day, year })}`
-      )
+          userId,
+        )}'s birthday to ${formatBirthday({ month, day, year })}`,
+      ),
     );
   },
 };

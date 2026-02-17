@@ -34,11 +34,14 @@ const checkForBirthdays = async (client) => {
     });
     const configs = await botSettingsService.getResources();
     for (let config of configs) {
-      const { month, day, year, startOfYear } = getCurrentDate(config.timezone);
+      const { month, day, year, startOfYear, guildId } = getCurrentDate(
+        config.timezone,
+      );
 
       const expiredBirthdayService = new BirthdayService({
         queryObj: {
           markedBday: true,
+          guildId,
           $or: [{ "date.month": { $ne: month } }, { "date.day": { $ne: day } }],
         },
         body: {
@@ -66,6 +69,7 @@ const checkForBirthdays = async (client) => {
             { lastNotified: { $exists: false } },
             { lastNotified: { $lt: startOfYear.toDate() } },
           ],
+          markedBday: false,
         },
         body: {
           lastNotified: new Date(),
@@ -84,17 +88,26 @@ const checkForBirthdays = async (client) => {
           if (config.roleId) {
             const guild = await client.guilds.fetch(config.guildId);
             const member = await guild.members.fetch(birthday.userId);
-            if (guild && member) await member.roles.add(config.roleId);
+            if (guild && member) {
+              try {
+                await member.roles.add(config.roleId);
+              } catch (err) {
+                console.error(
+                  "Permission error due to birthday role being above bot role",
+                  err,
+                );
+              }
+            }
           }
           await channel.send(
             blockQuote(
               `Today is ${userMention(
-                birthday.userId
+                birthday.userId,
               )}'s birthday! They are ${calculateAge(
                 birthday.date.year,
-                year
-              )} years old today. Happy birthday from me (Markiplier) and everyone else (Not Markiplier)!`
-            )
+                year,
+              )} years old today. Happy birthday from me (Markiplier) and everyone else (Not Markiplier)!`,
+            ),
           );
           birthdayService.fetchedResource = birthday;
           await birthdayService.updateResource();
@@ -118,7 +131,7 @@ const setActivity = (client) => {
 };
 
 const startCronJob = (client) => {
-  cron.schedule("*/10 * * * *", () => {
+  cron.schedule("* * * * *", () => {
     checkForBirthdays(client);
   });
   cron.schedule("*/25 * * * *", () => {
