@@ -6,6 +6,7 @@ const path = require("node:path");
 const mongoose = require("mongoose");
 const { startCronJob } = require("./cron");
 const wordDetections = require("./helpers/wordDetections");
+const { isPlainWord } = require("./helpers/isThing");
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -20,7 +21,7 @@ async function connectToDatabase() {
   const mongoConfig = {};
   if (process.env.FIXIE_SOCKS_HOST) {
     const fixieData = process.env.FIXIE_SOCKS_HOST.split(
-      new RegExp("[/(:\\/@/]+")
+      new RegExp("[/(:\\/@/]+"),
     );
     mongoConfig.proxyUsername = fixieData[0];
     mongoConfig.proxyPassword = fixieData[1];
@@ -44,7 +45,7 @@ for (const file of commandFiles) {
     client.commands.set(command.data.name, command);
   } else {
     console.log(
-      `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+      `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
     );
   }
 }
@@ -60,7 +61,7 @@ client.once("clientReady", async () => {
   } else {
     console.log("Registering global commands...");
     await client.application.commands.set(
-      client.commands.map((cmd) => cmd.data)
+      client.commands.map((cmd) => cmd.data),
     );
     console.log("Global commands registered");
   }
@@ -75,13 +76,19 @@ client.on("messageCreate", async (message) => {
       ({ detect = [], react = () => {}, guildIds }) => {
         if (guildIds && !guildIds.includes(message.guildId)) return;
         if (
-          detect.some((word) =>
-            content.toLowerCase().includes(word.toLowerCase())
-          )
+          detect.some((word) => {
+            const filteredOutContent = content
+              .split(" ")
+              .filter((word) => isPlainWord(word));
+            return filteredOutContent
+              .join(" ")
+              .toLowerCase()
+              .includes(word.toLowerCase());
+          })
         ) {
           react();
         }
-      }
+      },
     );
   } catch (err) {
     console.error(err);
